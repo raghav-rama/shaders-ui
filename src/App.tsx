@@ -62,27 +62,28 @@ const fragmentShader = /* glsl */ `
     vec2 uv = vUv;
     vec2 mouse = u_mouse;
     vec2 centered = (uv - 0.5) * vec2(u_resolution.x / u_resolution.y, 1.0);
-    float t = u_time * 0.3;
+    float t = u_time * 0.35;
 
     vec2 warp = vec2(
-      fbm(uv * 3.0 + t),
-      fbm(uv * 3.0 - t + 10.0)
+      fbm(uv * 3.1 + t),
+      fbm(uv * 3.1 - t + 10.0)
     );
 
-    float mousePull = smoothstep(0.6, 0.04, distance(uv, mouse));
-    vec2 warpedUv = uv + warp * 0.12 + (mouse - uv) * mousePull * 0.35;
+    float dist = distance(uv, mouse);
+    float mousePull = exp(-pow(dist * 10.0, 2.4));
+    vec2 warpedUv = uv + warp * 0.14 + (mouse - uv) * mousePull * 0.18;
 
-    float layers = fbm(warpedUv * 3.5 + t * 0.8);
-    float halo = smoothstep(0.1, 0.9, 1.0 - length(centered)) * 0.15;
-    float luminance = smoothstep(0.2, 0.95, layers + halo + mousePull * 0.8);
+    float layers = fbm(warpedUv * 4.0 + t * 1.0);
+    float halo = smoothstep(0.08, 0.94, 1.0 - length(centered)) * 0.12;
+    float luminance = smoothstep(0.1, 0.9, layers + halo);
+    luminance = clamp(luminance, 0.05, 0.78);
 
-    vec3 base = vec3(0.02, 0.03, 0.08);
-    vec3 mid = vec3(0.13, 0.27, 0.52);
-    vec3 accent = vec3(0.98, 0.86, 0.48);
+    vec3 base = vec3(0.02, 0.05, 0.12);
+    vec3 mid = vec3(0.10, 0.24, 0.55);
+    vec3 accent = vec3(0.52, 0.93, 0.86);
 
     vec3 color = mix(mid, accent, luminance);
-    color = mix(base, color, 0.92);
-    color += mousePull * 0.25 * accent;
+    color = mix(base, color, 0.82);
 
     gl_FragColor = vec4(color, 1.0);
   }
