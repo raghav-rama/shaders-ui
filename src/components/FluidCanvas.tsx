@@ -1,9 +1,9 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import { ShaderMaterial, Vector2 } from "three";
-import { fluidFragmentShader, fluidVertexShader } from "../shaders/fluid";
+import { heroFragment, heroVertex } from "../shaders/fluid";
 
-function FluidPlane() {
+function FluidLayer() {
   const materialRef = useRef<ShaderMaterial>(null);
   const mouseTarget = useRef(new Vector2(0.5, 0.5));
   const mouse = useRef(new Vector2(0.5, 0.5));
@@ -16,7 +16,6 @@ function FluidPlane() {
         1 - event.clientY / size.height
       );
     };
-
     window.addEventListener("pointermove", handleMove);
     return () => window.removeEventListener("pointermove", handleMove);
   }, [size.height, size.width]);
@@ -29,15 +28,6 @@ function FluidPlane() {
       );
     }
   }, [size.height, size.width]);
-
-  useFrame((_, delta) => {
-    const material = materialRef.current;
-    if (!material) return;
-
-    material.uniforms.u_time.value += delta;
-    mouse.current.lerp(mouseTarget.current, 0.08);
-    material.uniforms.u_mouse.value.copy(mouse.current);
-  });
 
   const uniforms = useMemo(
     () => ({
@@ -53,14 +43,22 @@ function FluidPlane() {
     []
   );
 
+  useFrame((_, delta) => {
+    const mat = materialRef.current;
+    if (!mat) return;
+    mat.uniforms.u_time.value += delta;
+    mouse.current.lerp(mouseTarget.current, 0.12);
+    mat.uniforms.u_mouse.value.copy(mouse.current);
+  });
+
   return (
-    <mesh scale={[viewport.width, viewport.height, 1]} position={[0, 0, 0]}>
-      <planeGeometry args={[1, 1, 1, 1]} />
+    <mesh scale={[viewport.width, viewport.height, 1]}>
+      <planeGeometry args={[1, 1]} />
       <shaderMaterial
         ref={materialRef}
+        vertexShader={heroVertex}
+        fragmentShader={heroFragment}
         uniforms={uniforms}
-        vertexShader={fluidVertexShader}
-        fragmentShader={fluidFragmentShader}
         transparent={false}
       />
     </mesh>
@@ -75,7 +73,7 @@ export function FluidCanvas() {
       orthographic
       camera={{ position: [0, 0, 1], zoom: 1.2 }}
     >
-      <FluidPlane />
+      <FluidLayer />
     </Canvas>
   );
 }
