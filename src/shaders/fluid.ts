@@ -57,12 +57,8 @@ export const heroFragment = /* glsl */ `
 
     // Cursor influence softened (no glow add)
     float d = distance(vUv, mouse);
-    float lens = exp(-pow(d * 6.0, 2.0));
-    uv += (mouse - vUv) * lens * 0.12;
-
-    float swirl = sin(atan(centered.y, centered.x) * 3.2 + t * 1.0) * 0.08;
-    float radial = length(centered);
-    float mask = smoothstep(0.9, 0.35, radial + swirl);
+    float lens = exp(-pow(d * 5.0, 2.0));
+    uv += (mouse - vUv) * lens * 0.08;
 
     float cloud = fbm(uv * 3.0 + vec2(t * 0.18, -t * 0.14));
     float detail = fbm(uv * 6.0 - vec2(t * 0.32, t * 0.26));
@@ -74,8 +70,8 @@ export const heroFragment = /* glsl */ `
     vec3 violet = vec3(0.48, 0.42, 0.88);
 
     vec3 base = mix(baseB, baseA, smoothstep(0.0, 1.0, vUv.y));
-    vec3 ink = mix(violet, warm, clamp(density * 1.1 + lens * 0.15, 0.0, 1.0));
-    vec3 color = mix(base, ink, mask * 0.8);
+    vec3 ink = mix(violet, warm, clamp(density * 1.05 + lens * 0.2, 0.0, 1.0));
+    vec3 color = mix(base, ink, 0.72);
     color = clamp(color, 0.0, 1.0);
 
     gl_FragColor = vec4(color, 1.0);

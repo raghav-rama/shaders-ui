@@ -1,15 +1,12 @@
 import { useRef } from "react";
 import { FluidCanvas } from "./components/FluidCanvas";
-import { useCursorFollower } from "./hooks/useCursorFollower";
 import { useLenisScroll } from "./hooks/useLenisScroll";
 import { useScrollAnimations } from "./hooks/useScrollAnimations";
 import "./App.css";
 
 function App() {
   const appRef = useRef<HTMLDivElement>(null);
-  const cursorRef = useRef<HTMLDivElement>(null);
   useLenisScroll();
-  useCursorFollower(cursorRef);
   useScrollAnimations(appRef);
 
   return (
@@ -17,8 +14,6 @@ function App() {
       <div className="background">
         <FluidCanvas />
       </div>
-
-      <div className="cursor" ref={cursorRef} />
 
       <main className="page">
         <nav className="nav">

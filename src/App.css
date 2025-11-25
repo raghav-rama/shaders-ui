@@ -112,16 +112,7 @@
 }
 
 .cursor {
-  position: fixed;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 232, 138, 0.85);
-  pointer-events: none;
-  transform: translate3d(-50%, -50%, 0);
-  mix-blend-mode: difference;
-  z-index: 10;
-  box-shadow: 0 0 24px rgba(255, 232, 138, 0.25);
+  display: none;
 }
 
 .fade-up {
