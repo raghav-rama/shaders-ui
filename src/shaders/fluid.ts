@@ -46,37 +46,36 @@ export const heroFragment = /* glsl */ `
     vec2 mouse = u_mouse;
 
     vec2 centered = (uv - 0.5) * vec2(aspect, 1.0);
-    float t = u_time * 0.35;
+    float t = u_time * 0.28;
 
-    // Domain warp with a light swirl
+    // Domain warp with gentle swirl
     vec2 warp = vec2(
-      fbm(uv * 2.4 + t * 0.6),
-      fbm(uv * 2.4 - t * 0.45)
+      fbm(uv * 2.4 + t * 0.5),
+      fbm(uv * 2.4 - t * 0.4)
     );
-    uv += warp * 0.12;
+    uv += warp * 0.08;
 
-    // Cursor influence as a soft lens + hue shift
+    // Cursor influence softened (no glow add)
     float d = distance(vUv, mouse);
-    float lens = exp(-pow(d * 8.0, 2.0));
-    uv += (mouse - vUv) * lens * 0.2;
+    float lens = exp(-pow(d * 6.0, 2.0));
+    uv += (mouse - vUv) * lens * 0.12;
 
-    float swirl = sin(atan(centered.y, centered.x) * 3.5 + t * 1.2) * 0.12;
+    float swirl = sin(atan(centered.y, centered.x) * 3.2 + t * 1.0) * 0.08;
     float radial = length(centered);
-    float mask = smoothstep(0.9, 0.3, radial + swirl);
+    float mask = smoothstep(0.9, 0.35, radial + swirl);
 
-    float cloud = fbm(uv * 3.0 + vec2(t * 0.2, -t * 0.15));
-    float detail = fbm(uv * 6.0 - vec2(t * 0.4, t * 0.3));
-    float density = mix(cloud, detail, 0.45) + lens * 0.45;
+    float cloud = fbm(uv * 3.0 + vec2(t * 0.18, -t * 0.14));
+    float detail = fbm(uv * 6.0 - vec2(t * 0.32, t * 0.26));
+    float density = mix(cloud, detail, 0.4);
 
-    vec3 baseA = vec3(0.07, 0.14, 0.42);
-    vec3 baseB = vec3(0.02, 0.07, 0.22);
+    vec3 baseA = vec3(0.06, 0.16, 0.45);
+    vec3 baseB = vec3(0.02, 0.06, 0.22);
     vec3 warm = vec3(0.95, 0.7, 0.45);
-    vec3 violet = vec3(0.5, 0.4, 0.9);
+    vec3 violet = vec3(0.48, 0.42, 0.88);
 
     vec3 base = mix(baseB, baseA, smoothstep(0.0, 1.0, vUv.y));
-    vec3 ink = mix(violet, warm, clamp(density * 1.2, 0.0, 1.0));
-    vec3 color = mix(base, ink, mask * 0.9);
-    color += lens * warm * 0.35;
+    vec3 ink = mix(violet, warm, clamp(density * 1.1 + lens * 0.15, 0.0, 1.0));
+    vec3 color = mix(base, ink, mask * 0.8);
     color = clamp(color, 0.0, 1.0);
 
     gl_FragColor = vec4(color, 1.0);
