@@ -22,7 +22,7 @@ body {
   min-height: 100vh;
   background: #0a1f4a;
   color: #e9ecff;
-  cursor: default;
+  cursor: none;
 }
 
 a {

@@ -2,18 +2,23 @@ import { useRef } from "react";
 import { FluidCanvas } from "./components/FluidCanvas";
 import { useLenisScroll } from "./hooks/useLenisScroll";
 import { useScrollAnimations } from "./hooks/useScrollAnimations";
+import { useCursorFollower } from "./hooks/useCursorFollower";
 import "./App.css";
 
 function App() {
   const appRef = useRef<HTMLDivElement>(null);
+  const cursorRef = useRef<HTMLDivElement>(null);
   useLenisScroll();
   useScrollAnimations(appRef);
+  useCursorFollower(cursorRef);
 
   return (
     <div className="app" ref={appRef}>
       <div className="background">
         <FluidCanvas />
       </div>
+
+      <div className="cursor" ref={cursorRef} />
 
       <main className="page">
         <nav className="nav">
