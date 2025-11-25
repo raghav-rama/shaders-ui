@@ -7,6 +7,7 @@ function FluidLayer() {
   const materialRef = useRef<ShaderMaterial>(null);
   const mouseTarget = useRef(new Vector2(0.5, 0.5));
   const mouse = useRef(new Vector2(0.5, 0.5));
+  const mouseVelocity = useRef(new Vector2());
   const { size, viewport } = useThree();
 
   useEffect(() => {
@@ -33,6 +34,7 @@ function FluidLayer() {
     () => ({
       u_time: { value: 0 },
       u_mouse: { value: new Vector2(0.5, 0.5) },
+      u_mouseVel: { value: new Vector2(0, 0) },
       u_resolution: {
         value: new Vector2(
           typeof window !== "undefined" ? window.innerWidth : 1,
@@ -47,8 +49,16 @@ function FluidLayer() {
     const mat = materialRef.current;
     if (!mat) return;
     mat.uniforms.u_time.value += delta;
-    mouse.current.lerp(mouseTarget.current, 0.12);
+
+    const prev = mouse.current.clone();
+    mouse.current.lerp(mouseTarget.current, 0.18);
+    mouseVelocity.current
+      .copy(mouse.current)
+      .sub(prev)
+      .multiplyScalar(60); // rough px/sec proxy
+
     mat.uniforms.u_mouse.value.copy(mouse.current);
+    mat.uniforms.u_mouseVel.value.copy(mouseVelocity.current);
   });
 
   return (

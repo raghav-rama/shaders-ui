@@ -11,6 +11,7 @@ export const heroFragment = /* glsl */ `
   varying vec2 vUv;
   uniform float u_time;
   uniform vec2 u_mouse;
+  uniform vec2 u_mouseVel;
   uniform vec2 u_resolution;
 
   float hash(vec2 p) {
@@ -44,6 +45,8 @@ export const heroFragment = /* glsl */ `
     vec2 uv = vUv;
     float aspect = u_resolution.x / u_resolution.y;
     vec2 mouse = u_mouse;
+    vec2 vel = u_mouseVel;
+    float speed = clamp(length(vel), 0.0, 3.0);
 
     vec2 centered = (uv - 0.5) * vec2(aspect, 1.0);
     float t = u_time * 0.28;
@@ -55,22 +58,29 @@ export const heroFragment = /* glsl */ `
     );
     uv += warp * 0.08;
 
-    // Cursor influence softened (no glow add)
+    // Cursor influence softened: slight lens + directional drift, no splat
     float d = distance(vUv, mouse);
-    float lens = exp(-pow(d * 5.0, 2.0));
-    uv += (mouse - vUv) * lens * 0.08;
+    float lens = exp(-pow(d * 4.5, 2.0));
+    vec2 dir = normalize(vel + 1e-5);
+    uv += dir * speed * 0.01;
+    uv += (mouse - vUv) * lens * 0.05;
 
     float cloud = fbm(uv * 3.0 + vec2(t * 0.18, -t * 0.14));
     float detail = fbm(uv * 6.0 - vec2(t * 0.32, t * 0.26));
-    float density = mix(cloud, detail, 0.4);
+    float streak = fbm(uv * 8.0 + dir * 0.8 + vec2(-t * 0.5, t * 0.35));
+    float density = mix(cloud, detail, 0.4) + streak * speed * 0.12;
 
-    vec3 baseA = vec3(0.06, 0.16, 0.45);
-    vec3 baseB = vec3(0.02, 0.06, 0.22);
-    vec3 warm = vec3(0.95, 0.7, 0.45);
-    vec3 violet = vec3(0.48, 0.42, 0.88);
+    vec3 baseA = vec3(0.08, 0.18, 0.48);
+    vec3 baseB = vec3(0.02, 0.05, 0.2);
+    vec3 warm = vec3(1.0, 0.78, 0.42);  // orange-gold highlight
+    vec3 violet = vec3(0.6, 0.48, 0.96);
+    vec3 blue = vec3(0.35, 0.55, 0.95);
 
     vec3 base = mix(baseB, baseA, smoothstep(0.0, 1.0, vUv.y));
-    vec3 ink = mix(violet, warm, clamp(density * 1.05 + lens * 0.2, 0.0, 1.0));
+    vec3 ink1 = mix(violet, warm, clamp(density * 1.05, 0.0, 1.0));
+    vec3 ink2 = mix(blue, warm, clamp(density * 0.85, 0.0, 1.0));
+    vec3 ink = mix(ink1, ink2, 0.5);
+
     vec3 color = mix(base, ink, 0.72);
     color = clamp(color, 0.0, 1.0);
 
